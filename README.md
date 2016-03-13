@@ -15,6 +15,8 @@ This plugin works on PhoneGap/Cordova 3.x. It's currently not tested against
 PhoneGap 4.x and known not to be working on PhoneGap/Cordova 5.x and above.
 ```
 
+Source: [cordova-plugin-loading-spinner](https://github.com/mobimentum/phonegap-plugin-loading-spinner)
+
 ## How to compile ?
 
 Read the section 'Using js_of_ocaml to develop in OCaml on mobile' first.
