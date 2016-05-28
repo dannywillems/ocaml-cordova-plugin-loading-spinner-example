@@ -12,43 +12,52 @@ let action_to_str a = match a with
   | Spinner -> "Show"
   | Hide -> "Hide"
 
-let new_button action =
-  let row = Dom_html.createDiv doc in
-  let col = Dom_html.createDiv doc in
-  let button = Dom_html.createButton doc in
-  row##.className := (Js.string "row");
-  col##.className := (Js.string "col s12");
-  button##.className := (Js.string "waves-effect waves-light btn");
-  button##.innerHTML := (Js.string (action_to_str action));
-  Lwt.async
-  ( fun () ->
-    Lwt_js_events.clicks button
-    ( fun _ev _thread ->
-      let spinner = Loadingspinner.loading_spinner () in
-      ignore (match action with
-      | Spinner_fs -> spinner##(show_opt (Loadingspinner.create_options
-      ~timeout:2000 ~fullscreen:true ()))
-      | Spinner_no_fs -> spinner##(show_opt (Loadingspinner.create_options
-      ~timeout:2000 ()))
-      | Spinner -> spinner##show
-      | Hide -> spinner##hide);
-      Lwt.return ()
-    )
-  );
-  Dom.appendChild col button;
-  Dom.appendChild row col;
-  row
-
-let on_device_ready _ =
+let on_device_ready () =
   let div = Dom_html.createDiv doc in
+  let spinner = Cordova_loading_spinner.t () in
+  let new_button action =
+    let row = Dom_html.createDiv doc in
+    let col = Dom_html.createDiv doc in
+    let button = Dom_html.createButton doc in
+    row##.className := (Js.string "row");
+
+    button##.className := (Js.string "waves-effect waves-light btn");
+    button##.innerHTML := (Js.string (action_to_str action));
+    button##.onclick := Dom.handler (fun ev ->
+    (ignore (match action with
+      | Spinner_fs ->
+          spinner#show
+            ~options:
+              (Cordova_loading_spinner.create_options
+                ~timeout:2000
+                ~fullscreen:true
+                ()
+              )
+            ()
+      | Spinner_no_fs ->
+          spinner#show
+            ~options:
+              (Cordova_loading_spinner.create_options
+                ~timeout:2000
+                ()
+              )
+            ()
+      | Spinner -> spinner#show ()
+      | Hide -> spinner#hide);
+      Js._false
+    ));
+    Dom.appendChild col button;
+    Dom.appendChild row col;
+    row
+  in
+
+
   div##.className := (Js.string "container center");
   Dom.appendChild div (new_button Spinner_fs);
   Dom.appendChild div (new_button Spinner_no_fs);
   Dom.appendChild div (new_button Spinner);
   Dom.appendChild div (new_button Hide);
-  Dom.appendChild doc##.body div;
-  Js._false
+  Dom.appendChild doc##.body div
 
 let _ =
-  Dom.addEventListener Dom_html.document (Dom.Event.make "deviceready")
-(Dom_html.handler on_device_ready) Js._false
+  Cordova.Event.device_ready on_device_ready
