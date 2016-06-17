@@ -14,7 +14,6 @@ let action_to_str a = match a with
 
 let on_device_ready () =
   let div = Dom_html.createDiv doc in
-  let spinner = Cordova_loading_spinner.t () in
   let new_button action =
     let row = Dom_html.createDiv doc in
     let col = Dom_html.createDiv doc in
@@ -26,7 +25,7 @@ let on_device_ready () =
     button##.onclick := Dom.handler (fun ev ->
     (ignore (match action with
       | Spinner_fs ->
-          spinner#show
+          Cordova_loading_spinner.show
             ~options:
               (Cordova_loading_spinner.create_options
                 ~timeout:2000
@@ -35,15 +34,15 @@ let on_device_ready () =
               )
             ()
       | Spinner_no_fs ->
-          spinner#show
+          Cordova_loading_spinner.show
             ~options:
               (Cordova_loading_spinner.create_options
                 ~timeout:2000
                 ()
               )
             ()
-      | Spinner -> spinner#show ()
-      | Hide -> spinner#hide);
+      | Spinner -> Cordova_loading_spinner.show ()
+      | Hide -> Cordova_loading_spinner.hide ());
       Js._false
     ));
     Dom.appendChild col button;
